@@ -1,6 +1,6 @@
-.errorText {
-  color: rgb(255, 0, 0);
-  font-family: sans-serif;
-  font-size: 20px;
-  text-align: center;
+.error {
+   font-size: 34px;
+   line-height: 1.5;
+
+   
 }

@@ -1,37 +1,41 @@
-import css from "./SearchBar.module.css";
-import { IoIosSearch } from "react-icons/io";
-import toast, { Toaster } from "react-hot-toast";
+import css from './SearchBar.module.css';
+import { sendNotifyEmptyField } from '../../toster';
 
-const SearchBar = ({ onSubmit }) => {
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const userValue = e.target.elements.searchingValue.value.trim();
-    if (userValue === "") {
-      toast.error("Enter a valid value!", {
-        duration: 4000,
-        position: "top-right",
-      });
-    } else onSubmit(userValue);
+function SearchBar({ onSearch }) {
+  const handleSubmit = event => {
+    event.preventDefault();
+
+    const form = event.target;
+    const queryValue = form.elements.query.value.trim();
+
+    if (queryValue === '') {
+      sendNotifyEmptyField();
+      return;
+    }
+
+    onSearch(queryValue);
+
+    form.reset();
   };
 
+
   return (
-    <header className={css.wrapper}>
-      <form onSubmit={handleSubmit}>
-        <Toaster />
-        <div className={css.formWrapper}>
-          <button type="submit" className={css.searchBtn}>
-            <IoIosSearch />
-          </button>
-          <input
-            className={css.textInput}
-            type="text"
-            name="searchingValue"
-            placeholder="Search photos and images"
-          />
-        </div>
+    <header className={css.header}>
+      <form onSubmit={handleSubmit} className={css.form}>
+        <input
+          className={css.input}
+          type="text"
+          name="query"
+          autoComplete="off"
+          autoFocus
+          placeholder="Search images and photos"
+        />
+        <button type="submit" className={css.button}>
+          Search
+        </button>
       </form>
     </header>
   );
-};
+}
 
 export default SearchBar;

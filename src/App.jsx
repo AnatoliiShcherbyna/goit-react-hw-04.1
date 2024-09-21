@@ -1,26 +1,37 @@
-import { useState, useEffect } from "react";
-import SearchBar from "./components/SearchBar/SearchBar";
-import ImageGallery from "./components/ImageGallery/ImageGallery";
-import ImageModal from "./components/ImageModal/ImageModal";
-import Loader from "./components/Loader/Loader";
-import ErrorMessage from "./components/ErrorMessage/ErrorMessage";
-import LoadMoreBtn from "./components/LoadMoreBtn/LoadMoreBtn";
-import fetchPhotos from "./fetchAPI";
-import toast, { Toaster } from "react-hot-toast";
+// --- Library
+import { useState, useEffect } from 'react';
+import { Toaster } from 'react-hot-toast';
+//
+// --- Variables
+import { getPictures } from './api';
+import { sendNotifyEndOfData, sendNotifyNotFound } from './toster';
+//
+// --- Components
+import SearchBar from './components/SearchBar/SearchBar';
+import ImageGallery from './components/ImageGallery/ImageGallery';
+import ImageModal from './components/ImageModal/ImageModal';
+import Loader from './components/Loader/Loader';
+import ErrorMessage from './components/ErrorMessage/ErrorMessage';
+import LoadMoreBtn from './components/LoadMoreBtn/LoadMoreBtn';
+//
+// --- Style
+import './App.css';
 
-const App = () => {
-  const [images, setImages] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(false);
-  const [searchingValue, setSearchingValue] = useState("");
-  const [modalIsOpen, setIsOpen] = useState(false);
-  const [pageNumber, setPageNumber] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [currentImage, setCurrentImage] = useState({
-    url: "",
-    alt: "",
+//  --------------------------------------------------------------------
+function App() {
+  const [imageProps, setImageProps] = useState({
+    url: '',
+    alt: '',
   });
+  const [query, setQuery] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [pictures, setPictures] = useState(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(null);
+  const [modalIsOpen, setIsOpen] = useState(false);
 
+  // --------------------------------------------------------------/
   function openModal() {
     setIsOpen(true);
   }
@@ -28,70 +39,92 @@ const App = () => {
   function closeModal() {
     setIsOpen(false);
   }
+  // --------------------------------------------------------------/
+  //
+  //
+  // ------- functions for work with buttons ---------/
+  function onSearch(queryValue) {
+    setQuery(queryValue);
+    setCurrentPage(1);
+    setPictures(null);
+  }
 
+  function onLoadMore() {
+    setCurrentPage(currentPage + 1);
+  }
+  // --------------------------------------------------/
+  //
+  //
+  // --------------------------------------------------/
   useEffect(() => {
-    if (searchingValue.trim() === "") return;
-    const getPhotos = async (value) => {
-      setError(false);
-      setIsLoading(true);
+    if (query === null) return;
+
+    async function fetchPictures() {
+      setLoading(true);
+
       try {
-        const data = await fetchPhotos(value, pageNumber);
-        setImages((prevImages) => {
-          if (prevImages !== null) {
-            return [...prevImages, ...data.results];
-          }
-          return data.results;
-        });
+        const response = await getPictures(query, currentPage);
 
-        setTotalPages(data.total_pages);
-        if (data.total_pages === 0) {
-          toast.error("Nothing was found for your request", {
-            duration: 4000,
-            position: "top-right",
+        if (pictures === null) {
+          setPictures(response.data.results);
+        } else {
+          setPictures(prevPictures => {
+            return [...prevPictures, ...response.data.results];
           });
-          return;
         }
-      } catch (error) {
-        setError(true);
+
+        setTotalPages(response.data.total_pages);
+        setError(null);
+
+        if (response.data.results.length === 0) {
+          sendNotifyNotFound();
+        }
+
+        if (currentPage === response.data.total_pages) {
+          sendNotifyEndOfData();
+        }
+      } catch (err) {
+        setError(err.message);
+        setPictures(null);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
-    };
-    getPhotos(searchingValue);
-  }, [searchingValue, pageNumber]);
+    }
 
-  const handleSubmit = (userValue) => {
-    setImages(null);
-    setPageNumber(1);
-    setSearchingValue(userValue);
-  };
-
+    fetchPictures();
+  }, [query, currentPage]);
+  // --------------------------------------------------/
+  //
+  //
+  //
+  // --------------------------------------------------/
   return (
-    <div>
-      <SearchBar onSubmit={handleSubmit} />
-      {images !== null && (
+    <>
+      <SearchBar onSearch={onSearch} />
+
+      {pictures !== null && (
         <ImageGallery
-          images={images}
+          pictures={pictures}
           openModal={openModal}
-          setCurrentImage={setCurrentImage}
+          setImageProps={setImageProps}
         />
       )}
+
+      {totalPages > currentPage && <LoadMoreBtn onLoadMore={onLoadMore} />}
+
+      {loading === true && <Loader />}
+
+      {error !== null && <ErrorMessage error={error} />}
+
       <ImageModal
         modalIsOpen={modalIsOpen}
         closeModal={closeModal}
-        currentImage={currentImage}
+        imageProps={imageProps}
       />
-      {isLoading && <Loader />}
-      {error && <ErrorMessage />}
-      {totalPages > pageNumber && (
-        <LoadMoreBtn
-          handleClick={() => {
-            setPageNumber(pageNumber + 1);
-          }}
-        />
-      )}
-    </div>
+
+      <Toaster position="top-right" reverseOrder={false} />
+    </>
   );
-};
+}
 
 export default App;

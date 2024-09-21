@@ -1,22 +1,22 @@
-import css from "./ImageGallery.module.css";
-import ImageCard from "../ImageCard/ImageCard";
+import ImageCard from '../ImageCard/ImageCard';
+import css from './ImageGallery.module.css'
 
-const ImageGallery = ({ images, openModal, setCurrentImage }) => {
+function ImageGallery({ pictures, openModal, setImageProps }) {
   return (
-    <ul className={css.list}>
-      {images.map((card) => (
-        <li className={css.listItem} key={card.id}>
-          <ImageCard
-            openModal={openModal}
-            setCurrentImage={setCurrentImage}
-            title={card.alt_description}
-            url={card.urls}
-            likes={card.likes}
-          />
-        </li>
-      ))}
+    <ul className={css.gallaryList}>
+      {pictures.map(picture => {
+        return (
+          <li key={picture.id} className={css.gallaryItem}>
+            <ImageCard
+              picture={picture}
+              openModal={openModal}
+              setImageProps={setImageProps}
+            />
+          </li>
+        );
+      })}
     </ul>
   );
-};
+}
 
 export default ImageGallery;

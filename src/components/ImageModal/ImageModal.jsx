@@ -1,34 +1,36 @@
-import css from "./ImageModal.module.css";
-import Modal from "react-modal";
-Modal.setAppElement("#root");
+import css from './ImageModal.module.css';
+import Modal from 'react-modal';
+
+Modal.setAppElement('#root');
 
 const customStyles = {
   content: {
-    width: "70%",
-    top: "50%",
-    left: "50%",
-    right: "auto",
-    bottom: "auto",
-    transform: "translate(-50%, -50%)",
+    width: '70%',
+    top: '50%',
+    left: '50%',
+    right: 'auto',
+    bottom: 'auto',
+    transform: 'translate(-50%, -50%)',
+    background: 'rgba(38, 40, 49, 0.968)',
+    border: 'none',
+    boxShadow: '0px 0px 3px 0px rgba(243, 241, 241, 0.402)',
+  },
+  overlay: {
+    background: 'rgba(38, 40, 49, 0.968)',
   },
 };
 
-const ImageModal = ({ modalIsOpen, closeModal, currentImage }) => {
+function ImageModal({ modalIsOpen, closeModal, imageProps }) {
   return (
     <Modal
       isOpen={modalIsOpen}
       onRequestClose={closeModal}
-      contentLabel="Example Modal"
       style={customStyles}
+      contentLabel="Example Modal"
     >
-      <img
-        className={css.photo}
-        src={currentImage.url}
-        alt={currentImage.alt}
-      />
-      <p className={css.descrription}>{currentImage.alt}</p>
+      <img className={css.picture} src={imageProps.url} alt={imageProps.alt} />
     </Modal>
   );
-};
+}
 
 export default ImageModal;

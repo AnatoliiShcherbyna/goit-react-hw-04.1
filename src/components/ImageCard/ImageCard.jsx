@@ -1,19 +1,24 @@
-import css from "./ImageCard.module.css";
+import css from './ImageCard.module.css'
 
-const ImageCard = ({ title, url, likes, openModal, setCurrentImage }) => {
-  const handleClick = () => {
-    setCurrentImage({ url: url.full, alt: title });
+function ImageCard({ picture, setImageProps, openModal }) {
+  function handleClick() {
     openModal();
-  };
+
+    setImageProps({
+      url: picture.urls.regular,
+      alt: picture.alt_description,
+    });
+  }
 
   return (
-    <div onClick={handleClick} className={css.wrapper}>
-      <img className={css.imageCard} src={url.small} alt={title} />
-      <div className={css.descriptionWrapper}>
-        <p>Likes: {likes}</p>
-      </div>
+    <div className={css.pictureThumb} onClick={handleClick}>
+      <img
+        src={picture.urls.small}
+        alt={picture.alt_description}
+        className={css.picture}
+      />
     </div>
   );
-};
+}
 
 export default ImageCard;
